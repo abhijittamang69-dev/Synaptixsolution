@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Synaptix Solutions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f; --bg-secondary: #111118; --bg-card: #16161f; --bg-hover: #1e1e2a;
+            --text-primary: #ffffff; --text-secondary: #a0a0b0; --text-muted: #6b6b7b;
+            --accent: #00f0ff; --accent-glow: rgba(0, 240, 255, 0.3); --accent-secondary: #ff6b35;
+            --border: rgba(255,255,255,0.06); --success: #22c55e; --warning: #f59e0b; --danger: #ef4444;
+        }
+        .logo-img { height: 36px; width: auto; max-width: 140px; object-fit: contain; margin-right: 0.7rem; border-radius: 6px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        .admin-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+        .sidebar { background: var(--bg-secondary); border-right: 1px solid var(--border); padding: 1.5rem; position: fixed; width: 260px; height: 100vh; overflow-y: auto; }
+        .sidebar-logo { display: flex; align-items: center; gap: 0.7rem; font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 2rem; text-decoration: none; color: var(--text-primary); }
+        .sidebar-logo i { width: 36px; height: 36px; background: linear-gradient(135deg, #00f0ff 0%, #ff6b35 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--bg-primary); }
+        .nav-section { margin-bottom: 1.5rem; }
+        .nav-section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 0.8rem; padding-left: 0.5rem; }
+        .nav-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.7rem 0.8rem; border-radius: 8px; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.3s ease; margin-bottom: 0.3rem; }
+        .nav-item:hover, .nav-item.active { background: var(--bg-hover); color: var(--accent); }
+        .nav-item i { width: 20px; text-align: center; }
+        .nav-badge { margin-left: auto; background: var(--accent-secondary); color: #fff; font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 50px; }
+        .main-content { margin-left: 260px; padding: 2rem; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .top-bar h1 { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; }
+        .top-bar-actions { display: flex; gap: 1rem; align-items: center; }
+        .refresh-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); padding: 0.6rem 1rem; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.3s ease; }
+        .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .admin-badge { background: linear-gradient(135deg, #00f0ff 0%, #ff6b35 100%); color: var(--bg-primary); padding: 0.4rem 1rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-icon { width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 1rem; }
+        .stat-icon.blue { background: rgba(0, 240, 255, 0.1); color: var(--accent); }
+        .stat-icon.orange { background: rgba(255, 107, 53, 0.1); color: var(--accent-secondary); }
+        .stat-icon.green { background: rgba(34, 197, 94, 0.1); color: var(--success); }
+        .stat-icon.yellow { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .stat-value { font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; font-weight: 700; margin-bottom: 0.3rem; }
+        .stat-label { font-size: 0.85rem; color: var(--text-muted); }
+        .section-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 2rem; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); }
+        .section-header h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .section-header h3 i { color: var(--accent); }
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 1rem 1.5rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border); background: var(--bg-secondary); }
+        td { padding: 1rem 1.5rem; font-size: 0.9rem; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+        tr:hover td { background: var(--bg-hover); }
+        .status-badge { display: inline-block; padding: 0.25rem 0.7rem; border-radius: 50px; font-size: 0.75rem; font-weight: 600; }
+        .status-pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+        .status-paid { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+        .status-failed { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+        .status-completed { background: rgba(34, 197, 94, 0.15); color: var(--success); }
+        .status-confirmed { background: rgba(0, 240, 255, 0.15); color: var(--accent); }
+        .status-new { background: rgba(0, 240, 255, 0.15); color: var(--accent); }
+        .status-read { background: rgba(107, 107, 123, 0.15); color: var(--text-muted); }
+        .action-btns { display: flex; gap: 0.5rem; }
+        .action-btn { width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-secondary); cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; }
+        .action-btn:hover { background: var(--accent); color: var(--bg-primary); border-color: var(--accent); }
+        .empty-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+        .empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9); width: 90%; max-width: 600px; max-height: 90vh; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 20px; z-index: 2001; opacity: 0; visibility: hidden; transition: all 0.4s ease; display: flex; flex-direction: column; overflow: hidden; }
+        .modal.active { opacity: 1; visibility: visible; transform: translate(-50%, -50%) scale(1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid var(--border); }
+        .modal-header h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem; }
+        .modal-header h3 i { color: var(--accent); }
+        .modal-close { background: none; border: none; color: var(--text-secondary); font-size: 1.2rem; cursor: pointer; }
+        .modal-close:hover { color: var(--accent); }
+        .modal-body { overflow-y: auto; padding: 1.5rem; }
+        .inquiry-detail-row { display: flex; margin-bottom: 1rem; }
+        .inquiry-detail-label { width: 120px; color: var(--text-muted); font-size: 0.85rem; flex-shrink: 0; }
+        .inquiry-detail-value { color: var(--text-primary); font-size: 0.95rem; }
+        .inquiry-detail-value.message { background: var(--bg-primary); padding: 1rem; border-radius: 10px; border: 1px solid var(--border); line-height: 1.6; }
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-primary); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .login-overlay.hidden { display: none; }
+        .login-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem; width: 90%; max-width: 400px; text-align: center; }
+        .login-logo { display: flex; align-items: center; justify-content: center; gap: 0.7rem; font-family: 'Space Grotesk', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; }
+        .login-logo i { width: 40px; height: 40px; background: linear-gradient(135deg, #00f0ff 0%, #ff6b35 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--bg-primary); }
+        .login-box h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.3rem; margin-bottom: 0.5rem; }
+        .login-box > p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; }
+        .login-box .form-group { margin-bottom: 1rem; }
+        .login-box input { width: 100%; padding: 1rem; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; color: var(--text-primary); font-size: 1rem; text-align: center; }
+        .login-box input:focus { outline: none; border-color: var(--accent); }
+        .submit-btn { width: 100%; padding: 1rem; background: linear-gradient(135deg, #00f0ff 0%, #ff6b35 100%); color: var(--bg-primary); border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-family: 'Inter', sans-serif; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px var(--accent-glow); }
+        @media (max-width: 1024px) {
+            .admin-layout { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .main-content { margin-left: 0; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <div class="login-logo">
+                <img src="assets/logo.png" alt="Synaptix Solutions Ltd Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <i class="fas fa-bolt" style="display:none;"></i>
+                <span>Synaptix</span>
+            </div>
+            <h3>Admin Login</h3>
+            <p>Enter password to access the admin dashboard</p>
+            <form onsubmit="checkLogin(event)">
+                <div class="form-group">
+                    <input type="password" id="adminPassword" placeholder="Enter admin password" required>
+                </div>
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-lock"></i> Login
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <a href="index.html" class="sidebar-logo">
+                <img src="assets/logo.png" alt="Synaptix Solutions Ltd Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <i class="fas fa-bolt" style="display:none;"></i>
+                <span>Synaptix</span>
+            </a>
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <a class="nav-item active" onclick="showTab('dashboard')">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a class="nav-item" onclick="showTab('bookings')">
+                    <i class="fas fa-calendar-check"></i> Bookings
+                    <span class="nav-badge" id="navBookingCount">0</span>
+                </a>
+                <a class="nav-item" onclick="showTab('inquiries')">
+                    <i class="fas fa-envelope"></i> Inquiries
+                    <span class="nav-badge" id="navInquiryCount">0</span>
+                </a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Settings</div>
+                <a class="nav-item" href="index.html">
+                    <i class="fas fa-home"></i> View Website
+                </a>
+                <a class="nav-item" href="booking.html">
+                    <i class="fas fa-calendar"></i> Booking Page
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div id="dashboard" class="tab-content active">
+                <div class="top-bar">
+                    <h1>Dashboard</h1>
+                    <div class="top-bar-actions">
+                        <button class="refresh-btn" onclick="loadData()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                        <span class="admin-badge">ADMIN</span>
+                    </div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fas fa-calendar-check"></i></div>
+                        <div class="stat-value" id="statTotalBookings">0</div>
+                        <div class="stat-label">Total Bookings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><i class="fas fa-envelope"></i></div>
+                        <div class="stat-value" id="statTotalInquiries">0</div>
+                        <div class="stat-label">Total Inquiries</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fas fa-clock"></i></div>
+                        <div class="stat-value" id="statPending">0</div>
+                        <div class="stat-label">Pending Bookings</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon yellow"><i class="fas fa-envelope-open"></i></div>
+                        <div class="stat-value" id="statNewInquiries">0</div>
+                        <div class="stat-label">New Inquiries</div>
+                    </div>
+                </div>
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3><i class="fas fa-chart-bar"></i> Recent Activity</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Type</th><th>ID</th><th>Customer</th><th>Service/Subject</th><th>Status</th><th>Date</th></tr>
+                            </thead>
+                            <tbody id="recentActivity">
+                                <tr><td colspan="6" class="empty-state"><i class="fas fa-inbox"></i><p>No recent activity</p></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="bookings" class="tab-content">
+                <div class="top-bar">
+                    <h1>Bookings</h1>
+                    <div class="top-bar-actions">
+                        <button class="refresh-btn" onclick="loadBookings()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                        <span class="admin-badge">ADMIN</span>
+                    </div>
+                </div>
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3><i class="fas fa-calendar-check"></i> All Bookings</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Booking ID</th><th>Name</th><th>Service</th><th>Property</th><th>Date</th><th>Time</th><th>Status</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody id="bookingsTable">
+                                <tr><td colspan="8" class="empty-state"><i class="fas fa-inbox"></i><p>No bookings yet</p></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="inquiries" class="tab-content">
+                <div class="top-bar">
+                    <h1>Inquiries</h1>
+                    <div class="top-bar-actions">
+                        <button class="refresh-btn" onclick="loadInquiries()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                        <span class="admin-badge">ADMIN</span>
+                    </div>
+                </div>
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3><i class="fas fa-envelope"></i> All Inquiries</h3>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Inquiry ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Service</th><th>Status</th><th>Date</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody id="inquiriesTable">
+                                <tr><td colspan="8" class="empty-state"><i class="fas fa-inbox"></i><p>No inquiries yet</p></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="inquiryModalOverlay" onclick="closeInquiryModal()"></div>
+    <div class="modal" id="inquiryModal">
+        <div class="modal-header">
+            <h3><i class="fas fa-envelope"></i> Inquiry Details</h3>
+            <button class="modal-close" onclick="closeInquiryModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body" id="inquiryModalBody"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://synaptix-website2-1.onrender.com/api';
+        const ADMIN_PASSWORD = 'Abhijit@2';
+
+        async function checkLogin(e) {
+            e.preventDefault();
+            const input = document.getElementById('adminPassword').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+            btn.disabled = true;
+            try {
+                const res = await fetch(`${API_BASE}/auth/admin-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: input })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    localStorage.setItem('synaptix_admin_token', result.token);
+                    localStorage.setItem('synaptix_admin', 'true');
+                    document.getElementById('loginOverlay').classList.add('hidden');
+                    loadData();
+                } else {
+                    alert('Incorrect password!');
+                    document.getElementById('adminPassword').value = '';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                if (input === ADMIN_PASSWORD) {
+                    localStorage.setItem('synaptix_admin', 'true');
+                    document.getElementById('loginOverlay').classList.add('hidden');
+                    loadData();
+                } else {
+                    alert('Incorrect password!');
+                    document.getElementById('adminPassword').value = '';
+                }
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        if (localStorage.getItem('synaptix_admin') === 'true') {
+            document.getElementById('loginOverlay').classList.add('hidden');
+        }
+
+        function getAuthHeaders() {
+            const token = localStorage.getItem('synaptix_admin_token');
+            return { 'Content-Type': 'application/json', ...(token && { 'Authorization': `Bearer ${token}` }) };
+        }
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.closest('.nav-item').classList.add('active');
+            if (tabId === 'bookings') loadBookings();
+            if (tabId === 'inquiries') loadInquiries();
+        }
+
+        async function loadData() {
+            try {
+                const res = await fetch(`${API_BASE}/dashboard`, { headers: getAuthHeaders() });
+                if (res.status === 401) {
+                    localStorage.removeItem('synaptix_admin');
+                    localStorage.removeItem('synaptix_admin_token');
+                    document.getElementById('loginOverlay').classList.remove('hidden');
+                    return;
+                }
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('statTotalBookings').textContent = data.data.totalBookings || 0;
+                    document.getElementById('statTotalInquiries').textContent = data.data.totalInquiries || 0;
+                    document.getElementById('statPending').textContent = data.data.pendingBookings || 0;
+                    document.getElementById('statNewInquiries').textContent = data.data.newInquiries || 0;
+                    document.getElementById('navBookingCount').textContent = data.data.totalBookings || 0;
+                    document.getElementById('navInquiryCount').textContent = data.data.totalInquiries || 0;
+                    const recent = [...(data.data.recentBookings || []), ...(data.data.recentInquiries || [])]
+                        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 10);
+                    const tbody = document.getElementById('recentActivity');
+                    if (recent.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><i class="fas fa-inbox"></i><p>No recent activity</p></td></tr>';
+                    } else {
+                        tbody.innerHTML = recent.map(item => {
+                            const isBooking = item.service !== undefined;
+                            return `<tr><td><span class="status-badge ${isBooking ? 'status-confirmed' : 'status-new'}">${isBooking ? 'Booking' : 'Inquiry'}</span></td><td>${item.id}</td><td>${item.name}</td><td>${isBooking ? item.service : (item.serviceType || 'General')}</td><td><span class="status-badge status-${item.status}">${item.status}</span></td><td>${new Date(item.createdAt).toLocaleDateString()}</td></tr>`;
+                        }).join('');
+                    }
+                }
+            } catch (error) { console.error('Load data error:', error); }
+        }
+
+        async function loadBookings() {
+            try {
+                const res = await fetch(`${API_BASE}/bookings`, { headers: getAuthHeaders() });
+                const data = await res.json();
+                const tbody = document.getElementById('bookingsTable');
+                if (!data.success || !data.data || data.data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="fas fa-inbox"></i><p>No bookings yet</p></td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.data.map(booking => `
+                    <tr><td><strong>${booking.id}</strong></td><td>${booking.name || 'N/A'}<br><small>${booking.phone || ''}</small></td><td>${booking.service || 'N/A'}</td><td>${booking.property || 'N/A'}</td><td>${booking.date || 'N/A'}</td><td>${booking.time || 'N/A'}</td><td><span class="status-badge status-${booking.status}">${booking.status}</span></td><td><div class="action-btns"><button class="action-btn" onclick="updateBookingStatus('${booking.id}', 'confirmed')" title="Confirm"><i class="fas fa-check"></i></button><button class="action-btn" onclick="updateBookingStatus('${booking.id}', 'completed')" title="Complete"><i class="fas fa-check-double"></i></button><button class="action-btn" onclick="updateBookingStatus('${booking.id}', 'cancelled')" title="Cancel"><i class="fas fa-times"></i></button></div></td></tr>
+                `).join('');
+            } catch (error) { console.error('Load bookings error:', error); }
+        }
+
+        async function updateBookingStatus(id, status) {
+            try {
+                await fetch(`${API_BASE}/bookings/${id}`, { method: 'PATCH', headers: getAuthHeaders(), body: JSON.stringify({ status }) });
+                loadBookings(); loadData();
+            } catch (error) { console.error('Update booking error:', error); }
+        }
+
+        async function loadInquiries() {
+            try {
+                const res = await fetch(`${API_BASE}/inquiries`, { headers: getAuthHeaders() });
+                const data = await res.json();
+                const tbody = document.getElementById('inquiriesTable');
+                if (!data.success || !data.data || data.data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><i class="fas fa-inbox"></i><p>No inquiries yet</p></td></tr>';
+                    return;
+                }
+                tbody.innerHTML = data.data.map(inquiry => `
+                    <tr style="${inquiry.status === 'new' ? 'background: rgba(0,240,255,0.03);' : ''}"><td><strong>${inquiry.id}</strong></td><td>${inquiry.name || 'N/A'}</td><td>${inquiry.email || 'N/A'}</td><td>${inquiry.phone || 'N/A'}</td><td>${inquiry.serviceType || 'General'}</td><td><span class="status-badge status-${inquiry.status}">${inquiry.status}</span></td><td>${inquiry.createdAt ? new Date(inquiry.createdAt).toLocaleDateString() : 'N/A'}</td><td><div class="action-btns"><button class="action-btn" onclick="viewInquiry('${inquiry.id}')" title="View Details"><i class="fas fa-eye"></i></button><button class="action-btn" onclick="updateInquiryStatus('${inquiry.id}', 'read')" title="Mark Read"><i class="fas fa-envelope-open"></i></button><button class="action-btn" onclick="deleteInquiry('${inquiry.id}')" title="Delete" style="color: #ef4444;"><i class="fas fa-trash"></i></button></div></td></tr>
+                `).join('');
+            } catch (error) { console.error('Load inquiries error:', error); }
+        }
+
+        async function viewInquiry(id) {
+            try {
+                const res = await fetch(`${API_BASE}/inquiries/${id}`, { headers: getAuthHeaders() });
+                const data = await res.json();
+                if (data.success && data.data) {
+                    const i = data.data;
+                    document.getElementById('inquiryModalBody').innerHTML = `
+                        <div class="inquiry-detail-row"><div class="inquiry-detail-label">Inquiry ID</div><div class="inquiry-detail-value">${i.id}</div></div>
+                        <div class="inquiry-detail-row"><div class="inquiry-detail-label">Name</div><div class="inquiry-detail-value">${i.name}</div></div>
+                        <div class="inquiry-detail-row"><div class="inquiry-detail-label">Email</div><div class="inquiry-detail-value"><a href="mailto:${i.email}" style="color:var(--accent)">${i.email}</a></div></div>
+                        <div class="inquiry-detail-row"><div class="inquiry-detail-label">Phone</div><div class="inquiry-detail-value"><a href="tel:${i.phone}" style="color:var(--accent)">${i.phone || 'N/A'}</a></div></div>
+                        <div class="inquiry-detail-row"><div class="inquiry-detail-label">Service</div><div class="inquiry-detail-value">${i.serviceType || 'General'}</div></div>
+                        <div class="inquiry-detail-row"><div class="inquiry-detail-label">Budget</div><div class="inquiry-detail-value">${i.budgetRange || 'Not specified'}</div></div>
+                        <div class="inquiry-detail-row"><div class="inquiry-detail-label">Date</div><div class="inquiry-detail-value">${new Date(i.createdAt).toLocaleString()}</div></div>
+                        <div class="inquiry-detail-row"><div class="inquiry-detail-label">Status</div><div class="inquiry-detail-value"><span class="status-badge status-${i.status}">${i.status}</span></div></div>
+                        <div class="inquiry-detail-row" style="flex-direction:column;gap:0.5rem;"><div class="inquiry-detail-label">Message</div><div class="inquiry-detail-value message">${i.message}</div></div>
+                    `;
+                    document.getElementById('inquiryModalOverlay').classList.add('active');
+                    document.getElementById('inquiryModal').classList.add('active');
+                    if (i.status === 'new') updateInquiryStatus(i.id, 'read');
+                }
+            } catch (error) { console.error('View inquiry error:', error); }
+        }
+
+        function closeInquiryModal() {
+            document.getElementById('inquiryModalOverlay').classList.remove('active');
+            document.getElementById('inquiryModal').classList.remove('active');
+        }
+
+        async function updateInquiryStatus(id, status) {
+            try {
+                await fetch(`${API_BASE}/inquiries/${id}`, { method: 'PATCH', headers: getAuthHeaders(), body: JSON.stringify({ status }) });
+                loadInquiries(); loadData();
+            } catch (error) { console.error('Update inquiry error:', error); }
+        }
+
+        async function deleteInquiry(id) {
+            if (!confirm('Are you sure you want to delete this inquiry?')) return;
+            try {
+                await fetch(`${API_BASE}/inquiries/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+                loadInquiries(); loadData();
+            } catch (error) { console.error('Delete inquiry error:', error); }
+        }
+
+        if (localStorage.getItem('synaptix_admin') === 'true') loadData();
+    </script>
+</body>
+</html>
